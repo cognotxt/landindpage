@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CognoMETER — Conciliação e Bilhetagem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-hover: #f1f5f9;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --brand-primary: #0f4c81;
+      --brand-primary-hover: #0a365c;
+      --brand-soft: #eff6ff;
+
+      --teal-600: #0d9488;
+      --teal-50: #f0fdfa;
+      --teal-border: #99f6e4;
+
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --amber-border: #fde68a;
+
+      --emerald-700: #047857;
+      --emerald-50: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --indigo-600: #4f46e5;
+      --indigo-50: #eef2ff;
+
+      --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 10px 25px -5px rgba(15, 23, 42, 0.04);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-shell {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar / Header */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0f4c81 0%, #0d9488 100%);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.03em;
+      box-shadow: 0 4px 10px rgba(15, 76, 129, 0.2);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background-color: var(--emerald-50);
+      color: var(--emerald-700);
+      border: 1px solid var(--emerald-border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--emerald-700);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.55rem 0.95rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid var(--border-strong);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .btn:hover {
+      background-color: var(--bg-subtle);
+      border-color: #94a3b8;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-primary);
+      border-color: var(--brand-primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--brand-primary-hover);
+      border-color: var(--brand-primary-hover);
+    }
+
+    /* Main Card */
+    .main-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    /* Control Strip (Competência) */
+    .control-strip {
+      padding: 1.25rem 1.75rem;
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .competencia-control {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .competencia-control label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .select-box {
+      position: relative;
+      flex: 1;
+      max-width: 280px;
+    }
+
+    .select-box select {
+      width: 100%;
+      appearance: none;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 2.2rem 0.5rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .select-box select:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.12);
+    }
+
+    .select-chevron {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+    }
+
+    .contract-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .contract-meta code {
+      font-family: "JetBrains Mono", monospace;
+      background: #e2e8f0;
+      color: var(--text-primary);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+    }
+
+    /* Card Content */
+    .card-body {
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .kpi-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.4rem;
+      background-color: var(--bg-surface);
+      transition: border-color 0.15s;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .kpi-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .tag-ocr {
+      background-color: var(--teal-50);
+      color: var(--teal-600);
+      border: 1px solid var(--teal-border);
+    }
+
+    .tag-ia {
+      background-color: var(--indigo-50);
+      color: var(--indigo-600);
+      border: 1px solid #c7d2fe;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+
+    .kpi-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .kpi-sub strong {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Progress Section */
+    .quota-panel {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.4rem;
+    }
+
+    .quota-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.75rem;
+    }
+
+    .quota-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .quota-percent {
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--amber-600);
+    }
+
+    .quota-percent.normal {
+      color: var(--teal-600);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background-color: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 0.75rem;
+    }
+
+    .progress-fill-base {
+      height: 100%;
+      background-color: var(--teal-600);
+      transition: width 0.35s ease;
+    }
+
+    .progress-fill-over {
+      height: 100%;
+      background-color: var(--amber-600);
+      transition: width 0.35s ease;
+    }
+
+    .quota-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-group {
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    /* Filter Tabs & Search */
+    .table-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .segmented-tabs {
+      display: inline-flex;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      gap: 0.2rem;
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .seg-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .seg-btn.active {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+
+    .tab-count {
+      font-size: 0.75rem;
+      padding: 0.05rem 0.4rem;
+      border-radius: 999px;
+      background-color: #e2e8f0;
+      color: var(--text-secondary);
+    }
+
+    .seg-btn.active .tab-count {
+      background-color: var(--brand-soft);
+      color: var(--brand-primary);
+    }
+
+    /* Data Table */
+    .table-wrapper {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background-color: var(--bg-subtle);
+      text-align: left;
+      padding: 0.75rem 1.15rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    th.num, td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    td {
+      padding: 0.95rem 1.15rem;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #fafbfc;
+    }
+
+    .srv-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .srv-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
+    }
+
+    .srv-code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      padding: 0.05rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .srv-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .qty-cell {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .unit-badge {
+      display: inline-block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .unit-badge.ia {
+      background-color: var(--indigo-50);
+      color: var(--indigo-600);
+      border-color: #c7d2fe;
+    }
+
+    .unit-badge.ocr {
+      background-color: var(--teal-50);
+      color: var(--teal-600);
+      border-color: var(--teal-border);
+    }
+
+    /* Financial Summary Footer */
+    .financial-card {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.4rem 1.5rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .fin-left .fin-eyebrow {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .fin-left .fin-total {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+
+    .fin-notice {
+      margin-top: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      color: #92400e;
+      background-color: var(--amber-50);
+      border: 1px solid var(--amber-border);
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+    }
+
+    .fin-breakdown {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      font-size: 0.86rem;
+    }
+
+    .fin-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fin-line strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .fin-line.divider {
+      border-top: 1px dashed var(--border-strong);
+      padding-top: 0.55rem;
+      margin-top: 0.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 720px) {
+      .kpi-grid,
+      .financial-card {
+        grid-template-columns: 1fr;
+      }
+      .card-body {
+        padding: 1.25rem;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .toolbar-actions,
+      .table-controls {
+        display: none;
+      }
+      .main-card {
+        box-shadow: none;
+        border: 1px solid #cbd5e1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Cabeçalho Superior -->
+    <header class="top-bar">
+      <div class="brand-group">
+        <div class="brand-icon" aria-hidden="true">CM</div>
+        <div class="brand-text">
+          <h1>
+            CognoMETER
+            <span class="status-pill"><span class="status-dot"></span> Conciliação</span>
+          </h1>
+          <p>Painel demonstrativo de bilhetagem • Valores fictícios de consumo</p>
+        </div>
+      </div>
+
+      <div class="toolbar-actions">
+        <button type="button" class="btn" id="btn-export-csv">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar CSV
+        </button>
+        <button type="button" class="btn btn-primary" onclick="window.print()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimir / PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- Painel Principal -->
+    <main class="main-card">
+      <!-- Barra de Competência -->
+      <div class="control-strip">
+        <div class="competencia-control">
+          <label for="competencia-select">Competência</label>
+          <div class="select-box">
+            <select id="competencia-select">
+              <option value="2027-01" selected>Janeiro 2027</option>
+              <option value="2026-12">Dezembro 2026</option>
+              <option value="2026-11">Novembro 2026</option>
+            </select>
+            <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="contract-meta">
+          <span>Franquia Base:</span>
+          <code>100.000 UCP/mês</code>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- Cards de Indicadores -->
+        <section class="kpi-grid" aria-label="Resumo de Consumo">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Páginas OCR</span>
+              <span class="kpi-tag tag-ocr">UCP</span>
+            </div>
+            <div class="kpi-value" id="kpi-ocr-total">120.000</div>
+            <div class="kpi-sub" id="kpi-ocr-detail">
+              <strong>100 mil</strong> franquia + <strong>20 mil</strong> excedentes
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Consumo UCIA</span>
+              <span class="kpi-tag tag-ia">IA Generativa &amp; Visão</span>
+            </div>
+            <div class="kpi-value" id="kpi-ucia-total">2.000</div>
+            <div class="kpi-sub">Unidades ilustrativas apuradas no ciclo</div>
+          </div>
+        </section>
+
+        <!-- Barra de Utilização da Franquia -->
+        <section class="quota-panel" aria-label="Utilização da franquia de OCR">
+          <div class="quota-header">
+            <span class="quota-title">Utilização da franquia de OCR</span>
+            <span class="quota-percent" id="quota-percent">120%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill-base" id="bar-base" style="width: 83.33%"></div>
+            <div class="progress-fill-over" id="bar-over" style="width: 16.67%"></div>
+          </div>
+          <div class="quota-legend">
+            <div class="legend-group">
+              <span class="legend-item">
+                <span class="legend-dot" style="background-color: var(--teal-600)"></span>
+                Franquia contratada (<span id="legend-base">100.000</span>)
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot" style="background-color: var(--amber-600)"></span>
+                Excedente (<span id="legend-over">20.000</span>)
+              </span>
+            </div>
+            <span>Tarifa excedente: <strong>R$ 0,70 / pág.</strong></span>
+          </div>
+        </section>
+
+        <!-- Tabela de Serviços Auditados -->
+        <section aria-label="Detalhamento de serviços">
+          <div class="table-controls">
+            <div class="segmented-tabs" role="tablist">
+              <button type="button" class="seg-btn active" data-filter="todos">
+                Todos <span class="tab-count" id="count-todos">5</span>
+              </button>
+              <button type="button" class="seg-btn" data-filter="ocr">
+                OCR <span class="tab-count" id="count-ocr">1</span>
+              </button>
+              <button type="button" class="seg-btn" data-filter="ia">
+                IA <span class="tab-count" id="count-ia">4</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serviço / Código</th>
+                  <th class="num">Quantidade</th>
+                  <th class="num">Unidade Faturável</th>
+                </tr>
+              </thead>
+              <tbody id="services-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Resumo Financeiro -->
+        <section class="financial-card" aria-label="Resumo financeiro">
+          <div class="fin-left">
+            <div class="fin-eyebrow">Faturamento CognoTXT — Exemplo</div>
+            <div class="fin-total" id="fin-total">R$ 64.000,00</div>
+            <div class="fin-notice">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Os preços unitários de UCIA ainda serão definidos em aditivo/tabela.
+            </div>
+          </div>
+
+          <div class="fin-breakdown">
+            <div class="fin-line">
+              <span>Franquia OCR (100.000 págs.)</span>
+              <strong id="fin-base">R$ 50.000,00</strong>
+            </div>
+            <div class="fin-line">
+              <span id="fin-over-label">Excedente OCR (20.000 × R$ 0,70)</span>
+              <strong id="fin-over">R$ 14.000,00</strong>
+            </div>
+            <div class="fin-line">
+              <span id="fin-ucia-label">Consumo IA (2.000 UCIA)</span>
+              <strong>A definir</strong>
+            </div>
+            <div class="fin-line divider">
+              <span>Subtotal Consolidado (OCR)</span>
+              <strong id="fin-subtotal">R$ 64.000,00</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const FRANQUIA_PAGINAS = 100000;
+    const VALOR_FRANQUIA = 50000;
+    const TARIFA_EXCEDENTE = 0.70;
+
+    const dadosCompetencias = {
+      "2027-01": {
+        label: "Janeiro 2027",
+        ocrPaginas: 120000,
+        servicos: [
+          { nome: "Páginas com OCR", codigo: "OCR-01", desc: "Extração textual, validação de assinatura e layout", cat: "ocr", qtd: 120000, unidade: "UCP" },
+          { nome: "Consultas documentais", codigo: "RAG-01", desc: "Busca semântica e síntese via pipeline RAG", cat: "ia", qtd: 1000, unidade: "1.000 UCIA" },
+          { nome: "Critérios avaliados", codigo: "VAL-01", desc: "Análise automatizada de conformidade documental", cat: "ia", qtd: 200, unidade: "600 UCIA" },
+          { nome: "Buscas por imagem", codigo: "IMG-01", desc: "Detecção de carimbos, etiquetas e similaridade visual", cat: "ia", qtd: 100, unidade: "200 UCIA" },
+          { nome: "Relatórios consolidados", codigo: "VAL-02", desc: "Geração estruturada de pareceres e dossiês", cat: "ia", qtd: 40, unidade: "200 UCIA" }
+        ],
+        totalUcia: 2000
+      },
+      "2026-12": {
+        label: "Dezembro 2026",
+        ocrPaginas: 94000,
+        servicos: [
+          { nome: "Páginas com OCR", codigo: "OCR-01", desc: "Extração textual, validação de assinatura e layout", cat: "ocr", qtd: 94000, unidade: "UCP" },
+          { nome: "Consultas documentais", codigo: "RAG-01", desc: "Busca semântica e síntese via pipeline RAG", cat: "ia", qtd: 820, unidade: "820 UCIA" },
+          { nome: "Critérios avaliados", codigo: "VAL-01", desc: "Análise automatizada de conformidade documental", cat: "ia", qtd: 150, unidade: "450 UCIA" },
+          { nome: "Buscas por imagem", codigo: "IMG-01", desc: "Detecção de carimbos, etiquetas e similaridade visual", cat: "ia", qtd: 80, unidade: "160 UCIA" },
+          { nome: "Relatórios consolidados", codigo: "VAL-02", desc: "Geração estruturada de pareceres e dossiês", cat: "ia", qtd: 25, unidade: "125 UCIA" }
+        ],
+        totalUcia: 1555
+      },
+      "2026-11": {
+        label: "Novembro 2026",
+        ocrPaginas: 108500,
+        servicos: [
+          { nome: "Páginas com OCR", codigo: "OCR-01", desc: "Extração textual, validação de assinatura e layout", cat: "ocr", qtd: 108500, unidade: "UCP" },
+          { nome: "Consultas documentais", codigo: "RAG-01", desc: "Busca semântica e síntese via pipeline RAG", cat: "ia", qtd: 910, unidade: "910 UCIA" },
+          { nome: "Critérios avaliados", codigo: "VAL-01", desc: "Análise automatizada de conformidade documental", cat: "ia", qtd: 180, unidade: "540 UCIA" },
+          { nome: "Buscas por imagem", codigo: "IMG-01", desc: "Detecção de carimbos, etiquetas e similaridade visual", cat: "ia", qtd: 95, unidade: "190 UCIA" },
+          { nome: "Relatórios consolidados", codigo: "VAL-02", desc: "Geração estruturada de pareceres e dossiês", cat: "ia", qtd: 32, unidade: "160 UCIA" }
+        ],
+        totalUcia: 1800
+      }
+    };
+
+    let filtroAtual = "todos";
+    let competenciaAtual = "2027-01";
+
+    const fmtNum = (n) => n.toLocaleString("pt-BR");
+    const fmtBRL = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+    function renderizarPainel() {
+      const dados = dadosCompetencias[competenciaAtual];
+      const baseUsada = Math.min(dados.ocrPaginas, FRANQUIA_PAGINAS);
+      const excedente = Math.max(0, dados.ocrPaginas - FRANQUIA_PAGINAS);
+      const percentual = Math.round((dados.ocrPaginas / FRANQUIA_PAGINAS) * 100);
+
+      // KPIs
+      document.getElementById("kpi-ocr-total").textContent = fmtNum(dados.ocrPaginas);
+      document.getElementById("kpi-ocr-detail").innerHTML = excedente > 0
+        ? `<strong>${fmtNum(baseUsada / 1000)} mil</strong> franquia + <strong>${fmtNum(excedente / 1000)} mil</strong> excedentes`
+        : `<strong>${fmtNum(baseUsada)}</strong> páginas dentro da franquia contratada`;
+
+      document.getElementById("kpi-ucia-total").textContent = fmtNum(dados.totalUcia);
+
+      // Barra de progresso
+      const pctEl = document.getElementById("quota-percent");
+      pctEl.textContent = `${percentual}%`;
+      pctEl.classList.toggle("normal", excedente === 0);
+
+      if (excedente > 0) {
+        const wBase = (baseUsada / dados.ocrPaginas) * 100;
+        const wOver = (excedente / dados.ocrPaginas) * 100;
+        document.getElementById("bar-base").style.width = `${wBase.toFixed(2)}%`;
+        document.getElementById("bar-over").style.width = `${wOver.toFixed(2)}%`;
+      } else {
+        document.getElementById("bar-base").style.width = `${percentual}%`;
+        document.getElementById("bar-over").style.width = `0%`;
+      }
+
+      document.getElementById("legend-base").textContent = fmtNum(baseUsada);
+      document.getElementById("legend-over").textContent = fmtNum(excedente);
+
+      // Contadores das abas
+      document.getElementById("count-todos").textContent = dados.servicos.length;
+      document.getElementById("count-ocr").textContent = dados.servicos.filter(s => s.cat === "ocr").length;
+      document.getElementById("count-ia").textContent = dados.servicos.filter(s => s.cat === "ia").length;
+
+      // Tabela
+      const tbody = document.getElementById("services-tbody");
+      tbody.innerHTML = "";
+      dados.servicos
+        .filter((s) => filtroAtual === "todos" || s.cat === filtroAtual)
+        .forEach((s) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              <div class="srv-title">${s.nome}</div>
+              <div class="srv-meta">
+                <span class="srv-code">${s.codigo}</span>
+                <span class="srv-desc">${s.desc}</span>
+              </div>
+            </td>
+            <td class="num qty-cell">${fmtNum(s.qtd)}</td>
+            <td class="num"><span class="unit-badge ${s.cat}">${s.unidade}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      // Financeiro
+      const valorExcedente = excedente * TARIFA_EXCEDENTE;
+      const valorTotal = VALOR_FRANQUIA + valorExcedente;
+
+      document.getElementById("fin-total").textContent = fmtBRL(valorTotal);
+      document.getElementById("fin-base").textContent = fmtBRL(VALOR_FRANQUIA);
+      document.getElementById("fin-over-label").textContent = `Excedente OCR (${fmtNum(excedente)} × R$ 0,70)`;
+      document.getElementById("fin-over").textContent = fmtBRL(valorExcedente);
+      document.getElementById("fin-ucia-label").textContent = `Consumo IA (${fmtNum(dados.totalUcia)} UCIA)`;
+      document.getElementById("fin-subtotal").textContent = fmtBRL(valorTotal);
+    }
+
+    // Eventos das abas
+    document.querySelectorAll(".seg-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        filtroAtual = btn.dataset.filter;
+        renderizarPainel();
+      });
+    });
+
+    // Evento de troca de competência
+    document.getElementById("competencia-select").addEventListener("change", (e) => {
+      competenciaAtual = e.target.value;
+      renderizarPainel();
+    });
+
+    // Exportar CSV real
+    document.getElementById("btn-export-csv").addEventListener("click", () => {
+      const dados = dadosCompetencias[competenciaAtual];
+      const linhas = [
+        ["Competencia", "Codigo", "Servico", "Categoria", "Quantidade", "Unidade_Faturavel"],
+        ...dados.servicos.map((s) => [
+          competenciaAtual,
+          s.codigo,
+          `"${s.nome}"`,
+          s.cat.toUpperCase(),
+          s.qtd,
+          `"${s.unidade}"`
+        ])
+      ];
+      const csv = "\uFEFF" + linhas.map((l) => l.join(";")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `CognoMETER_${competenciaAtual}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    renderizarPainel();
+  </script>
+</body>
+</html>
